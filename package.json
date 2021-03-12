@@ -1,0 +1,27 @@
+{
+  "name": "levi-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/touka-bot/levi-api.git"
+  },
+  "author": "angelsflyinhell",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/touka-bot/levi-api/issues"
+  },
+  "homepage": "https://github.com/touka-bot/levi-api#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "get-urls": "^10.0.0",
+    "got": "^11.8.2",
+    "jsdom": "^16.5.0"
+  }
+}
