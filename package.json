@@ -22,6 +22,8 @@
     "express": "^4.17.1",
     "get-urls": "^10.0.0",
     "got": "^11.8.2",
-    "jsdom": "^16.5.0"
+    "jsdom": "^16.5.0",
+    "regexp": "^1.0.0",
+    "wait-for-the-element": "^2.2.0"
   }
 }

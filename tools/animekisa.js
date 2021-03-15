@@ -3,6 +3,8 @@ const got = require('got');
 const utils = require("./utils");
 const getUrls = require('get-urls');
 
+const baseUrl = 'https://animekisa.tv';
+
 const {
     JSDOM
 } = jsdom;
@@ -21,15 +23,23 @@ module.exports = {
 
 function getSearchResults(url, res) {
     got(url).then(response => {
-        const dom = new JSDOM(response.body);
-        const innerHTML = dom.window.document.getElementsByClassName(`similarboxmain`).item(0).innerHTML;
 
         const respo = new Array();
-        const innerDom = new JSDOM(innerHTML);
-        let result = innerDom.window.document.getElementsByTagName(`a`);
-        for (let i = 1; i < result.length; i++) {
-            respo.push(utils.extractUrls(result.item(i).href)[0]);
+
+        const dom = new JSDOM(response.body);
+        for (let o = 0; o < dom.window.document.getElementsByClassName(`similarboxmain`).length; o++) {
+            const innerHTML = dom.window.document.getElementsByClassName(`similarboxmain`).item(0).innerHTML;
+
+
+            const innerDom = new JSDOM(innerHTML);
+            let result = innerDom.window.document.getElementsByTagName(`a`);
+
+            for (let i = 1; i < result.length; i++) {
+                if (!result.item(i).getAttribute('href').toString().endsWith("/"))
+                    respo.push(baseUrl + result.item(i).getAttribute('href').toString());
+            }
         }
+
         res.send(respo);
     }).catch(err => {
         return err;
@@ -38,27 +48,36 @@ function getSearchResults(url, res) {
 
 function getTitle(url, index, res) {
     got(url).then(response => {
-        const dom = new JSDOM(response.body);
-        const innerHTML = dom.window.document.getElementsByClassName(`container`).item(0).innerHTML;
-
         const respo = new Array();
-        const innerDom = new JSDOM(innerHTML);
-        let result = innerDom.window.document.getElementsByTagName(`a`);
-        for (let i = 1; i < result.length; i++) {
-            respo.push(utils.extractUrls(result.item(i).href)[0]);
+
+        const dom = new JSDOM(response.body);
+        for (let o = 0; o < dom.window.document.getElementsByClassName(`similarboxmain`).length; o++) {
+            const innerHTML = dom.window.document.getElementsByClassName(`similarboxmain`).item(0).innerHTML;
+
+
+            const innerDom = new JSDOM(innerHTML);
+            let result = innerDom.window.document.getElementsByTagName(`a`);
+
+            for (let i = 1; i < result.length; i++) {
+                if (!result.item(i).getAttribute('href').toString().endsWith("/"))
+                    respo.push(baseUrl + result.item(i).getAttribute('href').toString());
+            }
         }
 
         got(respo[index]).then(response => {
             const titleDom = new JSDOM(response.body);
-            const titleHTML = titleDom.window.document.getElementsByClassName(`episodes range active`)[0].innerHTML;
+            const titleHTML = titleDom.window.document.getElementsByClassName(`infoepbox`).item(0).innerHTML;
 
             const titleInnerDom = new JSDOM(titleHTML);
             const titleInnerHTML = titleInnerDom.window.document.getElementsByTagName(`a`);
-            const episodes = new Array();
+
+
+            const innerRespo = new Array();
             for (let i = 0; i < titleInnerHTML.length; i++) {
-                episodes.push(utils.extractUrls(titleInnerHTML.item(i).href)[0]);
+                innerRespo.push(baseUrl + '/' + titleInnerHTML.item(i).getAttribute('href').toString())
             }
-            res.send(episodes);
+
+            res.send(innerRespo);
         })
     }).catch(err => {
         return err;
@@ -67,43 +86,60 @@ function getTitle(url, index, res) {
 
 function getEpisode(url, index, episode, res) {
     got(url).then(response => {
-        const dom = new JSDOM(response.body);
-        const innerHTML = dom.window.document.getElementsByClassName(`container`).item(0).innerHTML;
-
-        console.log(innerHTML);
-
         const respo = new Array();
-        const innerDom = new JSDOM(innerHTML);
-        let result = innerDom.window.document.getElementsByTagName(`a`);
-        for (let i = 1; i < result.length; i++) {
-            respo.push(utils.extractUrls(result.item(i).href)[0]);
+
+        const dom = new JSDOM(response.body);
+        for (let o = 0; o < dom.window.document.getElementsByClassName(`similarboxmain`).length; o++) {
+            const innerHTML = dom.window.document.getElementsByClassName(`similarboxmain`).item(0).innerHTML;
+
+
+            const innerDom = new JSDOM(innerHTML);
+            let result = innerDom.window.document.getElementsByTagName(`a`);
+
+            for (let i = 1; i < result.length; i++) {
+                if (!result.item(i).getAttribute('href').toString().endsWith("/"))
+                    respo.push(baseUrl + result.item(i).getAttribute('href').toString());
+            }
         }
 
         got(respo[index]).then(response => {
             const titleDom = new JSDOM(response.body);
-            const titleHTML = titleDom.window.document.getElementsByClassName(`episodes range active`)[0].innerHTML;
+            const titleHTML = titleDom.window.document.getElementsByClassName(`infoepbox`).item(0).innerHTML;
 
             const titleInnerDom = new JSDOM(titleHTML);
             const titleInnerHTML = titleInnerDom.window.document.getElementsByTagName(`a`);
-            const episodes = new Array();
+
+
+            const innerRespo = new Array();
             for (let i = 0; i < titleInnerHTML.length; i++) {
-                episodes.push(utils.extractUrls(titleInnerHTML.item(i).href)[0]);
+                innerRespo.push(baseUrl + '/' + titleInnerHTML.item(i).getAttribute('href').toString())
             }
 
+            got(innerRespo[episode]).then(r => {
 
-            got(episodes[episode]).then(response => {
-                const episodeDom = new JSDOM(response.body);
-                const episodeHTML = episodeDom.window.document.body.innerHTML;
+                const urls = Array.from(getUrls(r.body));
 
-                const episodeInnerDom = new JSDOM(response.body);
-                const urls = Array.from(getUrls(episodeInnerDom.window.document.body.innerHTML));
-                for (let i = 0; i < urls.length; i++) {
-                   if(urls[i].startsWith(`https://storage.googleapis.com`)) {
-                        res.send(urls[i]);
-                        break;
-                   }
+                var destinationUrl;
+
+                for (let x = 0; x < urls.length; x++) {
+                    if(urls[x].toString().includes("vidstreaming.io"))
+                        destinationUrl = urls[x];
                 }
-                res.send(`4004`);
+
+                got(destinationUrl).then(response => {
+
+                    const destUrls = Array.from(getUrls(response.body));
+
+                    for (let x = 0; x < destUrls.length; x++) {
+                        if(destUrls[x].toString().includes("googleapis"))
+                        res.send(destUrls[x]);
+                    }
+
+                    res.send('4004');
+
+                    
+                })
+
             })
         })
     }).catch(err => {
