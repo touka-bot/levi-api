@@ -16,6 +16,9 @@ module.exports = {
     getTitle(url, index, res) {
         return getTitle(url, index, res)
     },
+    getThumbnail(url, index, res) {
+        return getThumbnail(url, index, res)
+    },
     getEpisode(url, index, episode, res) {
         return getEpisode(url, index, episode, res)
     }
@@ -78,6 +81,33 @@ function getTitle(url, index, res) {
             }
 
             res.send(innerRespo);
+        })
+    }).catch(err => {
+        return err;
+    });
+}
+
+function getThumbnail(url, index, res) {
+    got(url).then(response => {
+        const respo = new Array();
+
+        const dom = new JSDOM(response.body);
+        for (let o = 0; o < dom.window.document.getElementsByClassName(`similarboxmain`).length; o++) {
+            const innerHTML = dom.window.document.getElementsByClassName(`similarboxmain`).item(0).innerHTML;
+
+
+            const innerDom = new JSDOM(innerHTML);
+            let result = innerDom.window.document.getElementsByTagName(`a`);
+
+            for (let i = 1; i < result.length; i++) {
+                if (!result.item(i).getAttribute('href').toString().endsWith("/"))
+                    respo.push(baseUrl + result.item(i).getAttribute('href').toString());
+            }
+        }
+
+        got(respo[index]).then(response => {
+            const titleDom = new JSDOM(response.body);
+            res.send(baseUrl + '/' + titleDom.window.document.getElementsByClassName('posteri').item(0).getAttribute('src'));
         })
     }).catch(err => {
         return err;
