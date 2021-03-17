@@ -45,6 +45,7 @@ function getSearchResults(url, res) {
 
         res.send(respo);
     }).catch(err => {
+        res.send('4004');
         return err;
     });
 }
@@ -83,6 +84,7 @@ function getTitle(url, index, res) {
             res.send(innerRespo);
         })
     }).catch(err => {
+        res.send('4004');
         return err;
     });
 }
@@ -110,6 +112,7 @@ function getThumbnail(url, index, res) {
             res.send(baseUrl + '/' + titleDom.window.document.getElementsByClassName('posteri').item(0).getAttribute('src'));
         })
     }).catch(err => {
+        res.send('4004');
         return err;
     });
 }
@@ -173,6 +176,7 @@ function getEpisode(url, index, episode, res) {
             })
         })
     }).catch(err => {
+        res.send('4004');
         return err;
     });
 }
