@@ -31,13 +31,13 @@ function getSearchResults(url, res) {
 
         const dom = new JSDOM(response.body);
         for (let o = 0; o < dom.window.document.getElementsByClassName(`similarboxmain`).length; o++) {
-            const innerHTML = dom.window.document.getElementsByClassName(`similarboxmain`).item(0).innerHTML;
+            const innerHTML = dom.window.document.getElementsByClassName(`similarboxmain`).item(o).innerHTML;
 
 
             const innerDom = new JSDOM(innerHTML);
-            let result = innerDom.window.document.getElementsByTagName(`a`);
+            let result = innerDom.window.document.getElementsByClassName('an');
 
-            for (let i = 1; i < result.length; i++) {
+            for (let i = 0; i < result.length; i++) {
                 if (!result.item(i).getAttribute('href').toString().endsWith("/"))
                     respo.push(baseUrl + result.item(i).getAttribute('href').toString());
             }
@@ -56,13 +56,13 @@ function getTitle(url, index, res) {
 
         const dom = new JSDOM(response.body);
         for (let o = 0; o < dom.window.document.getElementsByClassName(`similarboxmain`).length; o++) {
-            const innerHTML = dom.window.document.getElementsByClassName(`similarboxmain`).item(0).innerHTML;
+            const innerHTML = dom.window.document.getElementsByClassName(`similarboxmain`).item(o).innerHTML;
 
 
             const innerDom = new JSDOM(innerHTML);
-            let result = innerDom.window.document.getElementsByTagName(`a`);
+            let result = innerDom.window.document.getElementsByClassName('an');
 
-            for (let i = 1; i < result.length; i++) {
+            for (let i = 0; i < result.length; i++) {
                 if (!result.item(i).getAttribute('href').toString().endsWith("/"))
                     respo.push(baseUrl + result.item(i).getAttribute('href').toString());
             }
@@ -95,13 +95,13 @@ function getThumbnail(url, index, res) {
 
         const dom = new JSDOM(response.body);
         for (let o = 0; o < dom.window.document.getElementsByClassName(`similarboxmain`).length; o++) {
-            const innerHTML = dom.window.document.getElementsByClassName(`similarboxmain`).item(0).innerHTML;
+            const innerHTML = dom.window.document.getElementsByClassName(`similarboxmain`).item(o).innerHTML;
 
 
             const innerDom = new JSDOM(innerHTML);
-            let result = innerDom.window.document.getElementsByTagName(`a`);
+            let result = innerDom.window.document.getElementsByClassName('an');
 
-            for (let i = 1; i < result.length; i++) {
+            for (let i = 0; i < result.length; i++) {
                 if (!result.item(i).getAttribute('href').toString().endsWith("/"))
                     respo.push(baseUrl + result.item(i).getAttribute('href').toString());
             }
@@ -123,13 +123,13 @@ function getEpisode(url, index, episode, res) {
 
         const dom = new JSDOM(response.body);
         for (let o = 0; o < dom.window.document.getElementsByClassName(`similarboxmain`).length; o++) {
-            const innerHTML = dom.window.document.getElementsByClassName(`similarboxmain`).item(0).innerHTML;
+            const innerHTML = dom.window.document.getElementsByClassName(`similarboxmain`).item(o).innerHTML;
 
 
             const innerDom = new JSDOM(innerHTML);
-            let result = innerDom.window.document.getElementsByTagName(`a`);
+            let result = innerDom.window.document.getElementsByClassName('an');
 
-            for (let i = 1; i < result.length; i++) {
+            for (let i = 0; i < result.length; i++) {
                 if (!result.item(i).getAttribute('href').toString().endsWith("/"))
                     respo.push(baseUrl + result.item(i).getAttribute('href').toString());
             }
@@ -155,7 +155,7 @@ function getEpisode(url, index, episode, res) {
                 var destinationUrl;
 
                 for (let x = 0; x < urls.length; x++) {
-                    if(urls[x].toString().includes("vidstreaming.io"))
+                    if (urls[x].toString().includes("vidstreaming.io"))
                         destinationUrl = urls[x];
                 }
 
@@ -164,13 +164,13 @@ function getEpisode(url, index, episode, res) {
                     const destUrls = Array.from(getUrls(response.body));
 
                     for (let x = 0; x < destUrls.length; x++) {
-                        if(destUrls[x].toString().includes("googleapis"))
-                        res.send(destUrls[x]);
+                        if (destUrls[x].toString().includes("googleapis"))
+                            res.send(destUrls[x]);
                     }
 
                     res.send('4004');
 
-                    
+
                 })
 
             })
