@@ -81,7 +81,7 @@ function getTitle(url, index, res) {
                 innerRespo.push(baseUrl + '/' + titleInnerHTML.item(i).getAttribute('href').toString())
             }
 
-            res.send(innerRespo);
+            res.send(innerRespo.reverse());
         })
     }).catch(err => {
         res.send('4004');
