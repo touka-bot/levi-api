@@ -21,6 +21,9 @@ module.exports = {
     },
     getEpisode(url, index, episode, res) {
         return getEpisode(url, index, episode, res)
+    },
+    newest(res) {
+        return newest(res)
     }
 }
 
@@ -148,18 +151,22 @@ function getEpisode(url, index, episode, res) {
                 innerRespo.push(baseUrl + '/' + titleInnerHTML.item(i).getAttribute('href').toString())
             }
 
-            got(innerRespo[episode]).then(r => {
+            got(innerRespo.reverse()[episode]).then(r => {
+                console.log(innerRespo.reverse()[episode]);
 
                 const urls = Array.from(getUrls(r.body));
 
                 var destinationUrl;
 
                 for (let x = 0; x < urls.length; x++) {
-                    if (urls[x].toString().includes("vidstreaming.io"))
+                    const host = urls[x].toString();
+                    if (host.includes("vidstreaming.io") || host.includes("gogo-stream.com") || host.includes("gogo-play.net"))
                         destinationUrl = urls[x];
                 }
 
                 got(destinationUrl).then(response => {
+
+                    console.log(destinationUrl);
 
                     const destUrls = Array.from(getUrls(response.body));
 
@@ -179,4 +186,23 @@ function getEpisode(url, index, episode, res) {
         res.send('4004');
         return err;
     });
+}
+
+function newest(res) {
+    const baseUrl = 'https://animekisa.tv';
+    got(baseUrl).then(response => {
+
+        const dom = new JSDOM(response.body);
+        const current = new JSDOM(dom.window.document.getElementsByClassName('listAnimes').item(0).innerHTML);
+
+        var r = new Array();
+
+        for (let i = 0; i < current.window.document.getElementsByClassName('an').length; i++) {
+            const href = current.window.document.getElementsByClassName('an').item(i).getAttribute('href');
+            if (!r.toString().includes(href) && !href.endsWith('/'))
+                r.push(baseUrl + href);
+        }
+
+        res.send(r);
+    })
 }

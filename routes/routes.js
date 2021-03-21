@@ -31,6 +31,10 @@ var appRouter = function (app) {
         const episode = req.params.episode;
         animekisa.getEpisode(url, index, episode, res);
     });
+
+    app.get("/touka/api/v2/newest/animekisa", function (req, res) {
+        animekisa.newest(res);
+    });
 }
 
 module.exports = appRouter;
