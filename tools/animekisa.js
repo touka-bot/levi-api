@@ -2,6 +2,7 @@ const jsdom = require("jsdom");
 const got = require('got');
 const utils = require("./utils");
 const getUrls = require('get-urls');
+const io = require('./IO');
 
 const baseUrl = 'https://animekisa.tv';
 
@@ -121,6 +122,7 @@ function getThumbnail(url, index, res) {
 }
 
 function getEpisode(url, index, episode, res) {
+
     got(url).then(response => {
         const respo = new Array();
 
@@ -171,8 +173,11 @@ function getEpisode(url, index, episode, res) {
                     const destUrls = Array.from(getUrls(response.body));
 
                     for (let x = 0; x < destUrls.length; x++) {
-                        if (destUrls[x].toString().includes("googleapis"))
-                            res.send(destUrls[x]);
+                        if (destUrls[x].toString().includes("googleapis")) {
+                            const videoId = makeid(5);
+                            io.addKey(videoId, destUrls[x]);
+                            res.send(videoId);
+                        }
                     }
 
                     res.send('4004');
@@ -205,4 +210,15 @@ function newest(res) {
 
         res.send(r);
     })
+}
+
+function makeid(length) {
+    var result = [];
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+        result.push(characters.charAt(Math.floor(Math.random() *
+            charactersLength)));
+    }
+    return result.join('');
 }
