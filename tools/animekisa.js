@@ -141,6 +141,8 @@ function getEpisode(url, index, episode, res) {
         }
 
         got(respo[index]).then(response => {
+
+            var responseCode = '4003';
             const titleDom = new JSDOM(response.body);
             const titleHTML = titleDom.window.document.getElementsByClassName(`infoepbox`).item(0).innerHTML;
 
@@ -154,9 +156,8 @@ function getEpisode(url, index, episode, res) {
             }
 
             got(innerRespo.reverse()[episode]).then(r => {
-                console.log(innerRespo.reverse()[episode]);
 
-                const urls = Array.from(getUrls(r.body));
+                var urls = Array.from(getUrls(r.body));
 
                 var destinationUrl;
 
@@ -168,20 +169,53 @@ function getEpisode(url, index, episode, res) {
 
                 got(destinationUrl).then(response => {
 
-                    console.log(destinationUrl);
-
-                    const destUrls = Array.from(getUrls(response.body));
+                    var destUrls = Array.from(getUrls(response.body));
+                    var downPage;
 
                     for (let x = 0; x < destUrls.length; x++) {
                         if (destUrls[x].toString().includes("googleapis")) {
                             const videoId = makeid(5);
                             io.addKey(videoId, destUrls[x]);
                             res.send(videoId);
+                        } else if (destUrls[x].toString().includes("/download?")) {
+                            downPage = destUrls[x];
                         }
                     }
 
-                    res.send('4004');
+                    got(downPage).then(ree => {
+                        const downUrls = Array.from(getUrls(ree.body));
+                        var portal;
 
+                        for (let x = 0; x < downUrls.length; x++) {
+                            if (downUrls[x].toString().includes("streamsb")) {
+                                portal = downUrls[x];
+                            }
+                        }
+
+                        got(portal).then(r => {
+                            const portalDom = new JSDOM(new JSDOM(r.body).window.document.getElementsByTagName('tbody').item(0).innerHTML);
+                            const porter = portalDom.window.document.getElementsByTagName('a');
+                            const fin = porter.item(porter.length - 1).getAttribute('onclick').replace("download_video(", "").replace(")", "").replace(new RegExp("'", 'g'), "").split(',');
+                            const portalDownload = `https://streamsb.net/dl?op=download_orig&id=${fin[0]}&mode=${fin[1]}&hash=${fin[2]}`;
+
+                            var pDwDom;
+                            got(portalDownload).then(r => {
+                                pDwDom = new JSDOM(new JSDOM(r.body).window.document.getElementsByTagName('span').item(0).outerHTML).window.document.getElementsByTagName('a');
+
+                                for (let m = 0; m < pDwDom.length; m++) {
+                                    if (pDwDom.item(m).attributes.length > 0) {
+                                        const videoId = makeid(5);
+                                        io.addKey(videoId, pDwDom.item(m).attributes.item(0).textContent);
+                                        responseCode = videoId;
+                                        res.send(videoId);
+                                    }
+                                }
+                                res.send('4003');
+                            })
+                            
+                        })
+                        
+                    })
 
                 })
 
