@@ -184,29 +184,70 @@ function getEpisode(url, index, episode, res) {
                     }
 
                     got(downPage).then(ree => {
-                        const downUrls = Array.from(getUrls(ree.body));
-                        var portal;
-                        for (let x = 0; x < downUrls.length; x++) {
 
-                            if (downUrls[x].toString().includes("streamsb")) {
-                                portal = downUrls[x];
-                            } else if (downUrls[x].toString().includes("sbembed")) {
-                                portal = downUrls[x];
+                        const downloaderHub = new JSDOM(ree.body);
+                        const available = downloaderHub.window.document.getElementsByTagName('a');
+
+                        for (let z = 0; z < available.length; z++) {
+                            if (available[z].text.includes('1080')) {
+                                const videoId = makeid(5);
+                                io.addKey(videoId, available[z].getAttribute('href'));
+                                responseCode = videoId;
+                                res.send(videoId);
+                                return;
                             }
+
                         }
 
-                        got(portal).then(r => {
-                            var requestAnother = true;
+                        for (let z = 0; z < available.length; z++) {
+                            if (available[z].text.includes('720')) {
+                                const videoId = makeid(5);
+                                io.addKey(videoId, available[z].getAttribute('href'));
+                                responseCode = videoId;
+                                res.send(videoId);
+                                return;
+                            }
 
-                            const portalDom = new JSDOM(new JSDOM(r.body).window.document.getElementsByTagName('tbody').item(0).innerHTML);
-                            const porter = portalDom.window.document.getElementsByTagName('a');
-                            const fin = porter.item(porter.length - 1).getAttribute('onclick').replace("download_video(", "").replace(")", "").replace(new RegExp("'", 'g'), "").split(',');
-                            const portalDownload = `https://streamsb.net/dl?op=download_orig&id=${fin[0]}&mode=${fin[1]}&hash=${fin[2]}`;
+                        }
 
-                            var pDwDom;
-                            getLinkFromPortal(portalDownload, res, pDwDom);
+                        for (let z = 0; z < available.length; z++) {
+                            if (available[z].text.includes('480')) {
+                                const videoId = makeid(5);
+                                io.addKey(videoId, available[z].getAttribute('href'));
+                                responseCode = videoId;
+                                res.send(videoId);
+                                return;
+                            }
 
-                        })
+                        }
+                        // const downUrls = Array.from(getUrls(ree.body));
+                        // var portal;
+                        // for (let x = 0; x < downUrls.length; x++) {
+
+                        //     if (downUrls[x].toString().includes("streamtape")) {
+                        //         portal = downUrls[x];
+                        //     } else if (downUrls[x].toString().includes("streamtape")) {
+                        //         portal = downUrls[x];
+                        //     }
+                        // }
+                        // console.log(portal);
+                        // got(portal).then(r => {
+
+                        //     const portalDom = new JSDOM(r.body);
+
+                        //     console.log(portalDom.window.document.body.toString().search('strcloud.link/get_video?'));
+
+                        //     var requestAnother = true;
+
+                        //     const portalDom = new JSDOM(new JSDOM(r.body).window.document.getElementsByTagName('tbody').item(0).innerHTML);
+                        //     const porter = portalDom.window.document.getElementsByTagName('a');
+                        //     const fin = porter.item(porter.length - 1).getAttribute('onclick').replace("download_video(", "").replace(")", "").replace(new RegExp("'", 'g'), "").split(',');
+                        //     const portalDownload = `https://streamsb.net/dl?op=download_orig&id=${fin[0]}&mode=${fin[1]}&hash=${fin[2]}`;
+
+                        //     var pDwDom;
+                        //     getLinkFromPortal(portalDownload, res, pDwDom);
+
+                        // })
 
                     })
 
@@ -260,13 +301,12 @@ function getLinkFromPortal(portalDownload, res, pDwDom) {
 
                 if (pDwDom.item(m).attributes.length > 0) {
                     const videoId = makeid(5);
-                    io.addKey(videoId, pDwDom.item(m).getAttribute('href').textContent);
+                    io.addKey(videoId, pDwDom.item(m).attributes.item(0).textContent);
                     responseCode = videoId;
-                    requestAnother = false;
                     res.send(videoId);
                 }
             }
-        }else (
+        } else(
             getLinkFromPortal(portalDownload, res, pDwDom)
         )
     })
