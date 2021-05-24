@@ -11,8 +11,6 @@ function addKey(key, value) {
     fs.writeFile('./keys.json', JSON.stringify(data), function(err, result) {
         if(err) console.log('error', err);
       });
-    
-    console.log(JSON.stringify(data));
 }
 
 module.exports = {

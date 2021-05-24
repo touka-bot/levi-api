@@ -177,6 +177,7 @@ function getEpisode(url, index, episode, res) {
                             const videoId = makeid(5);
                             io.addKey(videoId, destUrls[x]);
                             res.send(videoId);
+                            return;
                         } else if (destUrls[x].toString().includes("/download?")) {
                             downPage = destUrls[x];
                         }
@@ -185,14 +186,18 @@ function getEpisode(url, index, episode, res) {
                     got(downPage).then(ree => {
                         const downUrls = Array.from(getUrls(ree.body));
                         var portal;
-
                         for (let x = 0; x < downUrls.length; x++) {
+
                             if (downUrls[x].toString().includes("streamsb")) {
+                                portal = downUrls[x];
+                            }else if(downUrls[x].toString().includes("sbembed")) {
                                 portal = downUrls[x];
                             }
                         }
 
                         got(portal).then(r => {
+                            var requestAnother = true;
+
                             const portalDom = new JSDOM(new JSDOM(r.body).window.document.getElementsByTagName('tbody').item(0).innerHTML);
                             const porter = portalDom.window.document.getElementsByTagName('a');
                             const fin = porter.item(porter.length - 1).getAttribute('onclick').replace("download_video(", "").replace(")", "").replace(new RegExp("'", 'g'), "").split(',');
@@ -207,14 +212,13 @@ function getEpisode(url, index, episode, res) {
                                         const videoId = makeid(5);
                                         io.addKey(videoId, pDwDom.item(m).attributes.item(0).textContent);
                                         responseCode = videoId;
+                                        requestAnother = false;
                                         res.send(videoId);
                                     }
                                 }
-                                res.send('4003');
                             })
-                            
                         })
-                        
+
                     })
 
                 })
@@ -222,7 +226,7 @@ function getEpisode(url, index, episode, res) {
             })
         })
     }).catch(err => {
-        res.send('4004');
+        res.send('4014');
         return err;
     });
 }
