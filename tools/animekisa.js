@@ -190,7 +190,7 @@ function getEpisode(url, index, episode, res) {
 
                             if (downUrls[x].toString().includes("streamsb")) {
                                 portal = downUrls[x];
-                            }else if(downUrls[x].toString().includes("sbembed")) {
+                            } else if (downUrls[x].toString().includes("sbembed")) {
                                 portal = downUrls[x];
                             }
                         }
@@ -204,19 +204,8 @@ function getEpisode(url, index, episode, res) {
                             const portalDownload = `https://streamsb.net/dl?op=download_orig&id=${fin[0]}&mode=${fin[1]}&hash=${fin[2]}`;
 
                             var pDwDom;
-                            got(portalDownload).then(r => {
-                                pDwDom = new JSDOM(new JSDOM(r.body).window.document.getElementsByTagName('span').item(0).outerHTML).window.document.getElementsByTagName('a');
+                            getLinkFromPortal(portalDownload, res, pDwDom);
 
-                                for (let m = 0; m < pDwDom.length; m++) {
-                                    if (pDwDom.item(m).attributes.length > 0) {
-                                        const videoId = makeid(5);
-                                        io.addKey(videoId, pDwDom.item(m).attributes.item(0).textContent);
-                                        responseCode = videoId;
-                                        requestAnother = false;
-                                        res.send(videoId);
-                                    }
-                                }
-                            })
                         })
 
                     })
@@ -259,4 +248,26 @@ function makeid(length) {
             charactersLength)));
     }
     return result.join('');
+}
+
+function getLinkFromPortal(portalDownload, res, pDwDom) {
+    got(portalDownload).then(r => {
+        pDwDom = new JSDOM(new JSDOM(r.body).window.document.getElementsByTagName('span').item(0).outerHTML).window.document.getElementsByTagName('a');
+        console.log(pDwDom.length);
+
+        if (pDwDom.length >= 1) {
+            for (let m = 0; m < pDwDom.length; m++) {
+
+                if (pDwDom.item(m).attributes.length > 0) {
+                    const videoId = makeid(5);
+                    io.addKey(videoId, pDwDom.item(m).getAttribute('href').textContent);
+                    responseCode = videoId;
+                    requestAnother = false;
+                    res.send(videoId);
+                }
+            }
+        }else (
+            getLinkFromPortal(portalDownload, res, pDwDom)
+        )
+    })
 }
