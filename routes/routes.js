@@ -56,24 +56,6 @@ var appRouter = function (app) {
         res.sendStatus(200);
     });
 
-    app.get("/touka/api/v2/users/:id/history", function (req, res) {
-
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-        const key = req.params.id;
-        const value = io.getValue(key);
-
-        res.send(value);
-    });
-
-    app.get("/touka/api/v2/users/:id/history/add/:title", function (req, res) {
-        const key = req.params.id;
-        const val = req.params.title;
-        io.addKey(key, val);
-
-        res.sendStatus(200);
-    });
-
     app.get("/touka/api/v2/w2g/getsession/:url", function (req, res) {
         const url = Buffer.from(req.params.url, 'base64').toString();
         const data = JSON.stringify({
