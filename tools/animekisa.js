@@ -3,6 +3,7 @@ const got = require('got');
 const utils = require("./utils");
 const getUrls = require('get-urls');
 const io = require('./IO');
+const streamani = require('./streamani');
 
 const baseUrl = 'https://animekisa.tv';
 
@@ -163,92 +164,33 @@ function getEpisode(url, index, episode, res) {
 
                 for (let x = 0; x < urls.length; x++) {
                     const host = urls[x].toString();
-                    if (host.includes("vidstreaming.io") || host.includes("gogo-stream.com") || host.includes("gogo-play.net"))
+                    if (host.includes("vidstreaming.io") || host.includes("gogo-stream.com") || host.includes("gogo-play.net") || host.includes("streamani.net"))
                         destinationUrl = urls[x];
                 }
 
-                got(destinationUrl).then(response => {
+                const params = new URLSearchParams(destinationUrl);
 
-                    var destUrls = Array.from(getUrls(response.body));
-                    var downPage;
+                if(!params.has("id")) return;
+                const id = params.get("id");
 
-                    for (let x = 0; x < destUrls.length; x++) {
-                        if (destUrls[x].toString().includes("googleapis")) {
-                            const videoId = makeid(5);
-                            io.addKey(videoId, destUrls[x]);
-                            res.send(videoId);
-                            return;
-                        } else if (destUrls[x].toString().includes("/download?")) {
-                            downPage = destUrls[x];
-                        }
+                const reqOptions = { 
+                    headers: {
+                        "x-requested-with": "XMLHttpRequest",
+                        //    'User-Agent': 'Touka Bot'
                     }
+                }
 
-                    got(downPage).then(ree => {
+                got(streamani.getRequestUrl(id), reqOptions).json().then(r => {
+                    // Check if json contains the needed data
+                    if(!r || !r['source'] || !r['source'][0] || !r['source'][0]['file']) return;
 
-                        const downloaderHub = new JSDOM(ree.body);
-                        const available = downloaderHub.window.document.getElementsByTagName('a');
+                    let videoUrl = r['source'][0]['file'].split("?").shift()
 
-                        for (let z = 0; z < available.length; z++) {
-                            if (available[z].text.includes('1080')) {
-                                const videoId = makeid(5);
-                                io.addKey(videoId, available[z].getAttribute('href'));
-                                responseCode = videoId;
-                                res.send(videoId);
-                                return;
-                            }
-
-                        }
-
-                        for (let z = 0; z < available.length; z++) {
-                            if (available[z].text.includes('720')) {
-                                const videoId = makeid(5);
-                                io.addKey(videoId, available[z].getAttribute('href'));
-                                responseCode = videoId;
-                                res.send(videoId);
-                                return;
-                            }
-
-                        }
-
-                        for (let z = 0; z < available.length; z++) {
-                            if (available[z].text.includes('480')) {
-                                const videoId = makeid(5);
-                                io.addKey(videoId, available[z].getAttribute('href'));
-                                responseCode = videoId;
-                                res.send(videoId);
-                                return;
-                            }
-
-                        }
-
-                        for (let z = 0; z < available.length; z++) {
-                            if (available[z].text.includes('360')) {
-                                const videoId = makeid(5);
-                                io.addKey(videoId, available[z].getAttribute('href'));
-                                responseCode = videoId;
-                                res.send(videoId);
-                                return;
-                            }
-
-                        }
-
-
-                        for (let z = 0; z < available.length; z++) {
-                            if (available[z].text.includes('144')) {
-                                const videoId = makeid(5);
-                                io.addKey(videoId, available[z].getAttribute('href'));
-                                responseCode = videoId;
-                                res.send(videoId);
-                                return;
-                            }
-
-                        }
-
-
-                    })
-
+                    const videoId = makeid(5);
+                    io.addKey(videoId, videoUrl);
+                    res.send(videoId);
+                    return;
                 })
-
             })
         })
     }).catch(err => {
